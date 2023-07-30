@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Type Ahead 👀</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <form class="search-form">
+    <input type="text" class="search" placeholder="City or State">
+    <ul class="suggestions">
+      <li>Filter for a city</li>
+      <li>or a state</li>
+    </ul>
+  </form>
+<script>
+const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
+
+const cities=[]
+// Fetch API 提供了一个 JavaScript 接口，用于访问和操纵 HTTP 管道的一些具体部分，例如请求和响应
+fetch(endpoint)
+  .then(blob=>blob.json())
+  .then(data=>{
+    // 将data存入cities中
+    cities.push(...data)
+    // console.log(cities);
+})
+
+// 匹配输入值
+function findMatches(wordToMatch,cities){
+  return cities.filter(place=>{
+    // RegExp正则表达式
+    // i: ignoreCase   忽略单词大小写匹配
+    // m: multiline    可以进行多行匹配
+    // g: global       全局匹配
+    const regex = new RegExp(wordToMatch, 'gi')
+    // match() 方法将字符串与正则表达式进行匹配。
+    return place.city.match(regex)||place.state.match(regex)
+  })
+  
+}
+function displayMatches(){
+  console.log(this.value);
+  const matchArray=findMatches(this.value,cities)
+  console.log(matchArray);
+  // map和foreach函数区别  forEach() 会修改原来的数组。 map()方法会得到一个新的数组并返回。
+  const html= matchArray.map(place => {
+    const regex=new RegExp(this.value,'gi')
+    const city=place.city.replace(regex,`<span class="hl">${this.value}</span>`)
+    const state = place.state.replace(regex, `<span class="hl">${this.value}</span>`)
+    return `<li><span>${city},${state}</span></li>`    
+  }).join('');
+  // join() 把数组中的所有元素转换为一个字符串
+  suggestions.innerHTML =html
+}
+// 获取input ul
+const searchInput=document.querySelector('.search')
+const suggestions=document.querySelector('.suggestions')
+// 给input绑定keyup change事件
+searchInput.addEventListener('keyup',displayMatches)
+// searchInput.addEventListener('change',displayMatches)
+</script>
+</body>
+</html>

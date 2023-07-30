@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Type Ahead 👀</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <form class="search-form">
+    <input type="text" class="search" placeholder="City or State" />
+    <ul class="suggestions">
+      <li>Filter for a city</li>
+      <li>or a state</li>
+    </ul>
+  </form>
+  <script>
+    const endpoint =
+      "https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json";
+    const cities = [];
+    // 利用fetch函数获取api接口数据并储存在cities中
+    fetch(endpoint)
+      .then((blob) => blob.json())
+      .then((data) => cities.push(...data));
+    // 匹配输入值函数
+    function findMatches(wordToMatch, cities) {
+      return cities.filter((place) => {
+        // 使用正则函数筛选匹配值
+        // g global 全局匹配
+        // i ignoreCase 忽略大小写
+        const regex = new RegExp(wordToMatch, "gi");
+        return place.city.match(regex) || place.state.match(regex);
+      });
+    }
+    // 千分位分隔符
+    function numberWithCommas(x) {
+      return x.toString().replace(/(\d{1,3})(?=(\d{3})+(\.\d*)?$)/g, '$&,')
+    }
+    // 展示输入值函数
+    function displayMatches() {
+      const matchArray = findMatches(this.value, cities);
+      console.log(matchArray);
+      const html = matchArray.map(place => {
+        const regex = new RegExp(this.value, 'gi')
+        const cityName = place.city.replace(regex, `<span class="hl">${this.value}</span>`)
+        const stateName = place.state.replace(regex, `<span class="hl">${this.value}</span>`)
+        return `<li>
+            <span>${cityName},${stateName}</span>
+            <span>${numberWithCommas(place.population)}</span>
+            </li>`
+      }).join('')
+      // join() 把数组中的所有元素转换为一个字符串 如果省略括号内参数，则使用逗号作为分隔符。
+      suggestions.innerHTML = html
+
+    }
+    // 获取元素input和ul
+    const searchInput = document.querySelector(".search");
+    const suggestions = document.querySelector(".suggestions");
+    // 监听input元素keyup事件触发displayMatches函数
+    searchInput.addEventListener("keyup", displayMatches);
+  </script>
+</body>
+
+</html>
